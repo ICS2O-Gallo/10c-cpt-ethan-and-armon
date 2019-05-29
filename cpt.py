@@ -91,6 +91,3 @@ def on_mouse_release(x, y, button, modifiers):
 if __name__ == '__main__':
     setup()
 
-
-
-
