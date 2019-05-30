@@ -2,8 +2,8 @@ import random
 import arcade
 
 
-WIDTH = 640
-HEIGHT = 480
+WIDTH = 1366
+HEIGHT = 710
 SCALE = 0.3
 
 MOTOR_SPEED = 0.15
@@ -19,7 +19,7 @@ class Dust(object):
 
     def __init__(self):
         # Create a random spawning point
-        self.x = random.randrange(WIDTH, 2*WIDTH)
+        self.x = random.randrange(WIDTH, 1.5*WIDTH)
         self.y = random.randrange(HEIGHT)
 
         # set dust width to be able to delete it off screen
@@ -54,7 +54,7 @@ for particle in range(30):
 part_list = arcade.SpriteList()
 
 body = arcade.Sprite("images/motorcycle_drawing_new.png", SCALE)
-body.center_x = 50; body.center_y = 50
+body.center_x = WIDTH/8; body.center_y = HEIGHT/8
 part_list.append(body)
 
 # motorcycle movement:
@@ -65,12 +65,12 @@ def change_speed():
         if Accelerate:
             part.change_x += MOTOR_SPEED
         if Decelerate:
-            part.change_x -= MOTOR_SPEED  # we brake quicker
+            part.change_x -= 1.5*MOTOR_SPEED  # we brake quicker
             if part.change_x < -5:
                 part.change_x = -5
         else:
             if part.change_x < -1:
-                part.change_x += 0.3
+                part.change_x += 0.2
                 if part.change_x > -1 and Accelerate == False:
                     part.change_x = -1
 
