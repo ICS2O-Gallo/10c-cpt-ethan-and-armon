@@ -4,7 +4,7 @@ import arcade
 
 WIDTH = 640
 HEIGHT = 480
-SCALE = 0.15
+SCALE = 0.3
 
 MOTOR_SPEED = 5
 
@@ -104,16 +104,19 @@ def on_draw():
 def on_key_press(key, modifiers):
     if key == arcade.key.RIGHT:
         for part in part_list:
-            part.change_x = MOTOR_SPEED
+            part.change_x += MOTOR_SPEED
     if key == arcade.key.LEFT:
         for part in part_list:
-            part.change_x = -MOTOR_SPEED
+            part.change_x -=MOTOR_SPEED
 
 
 def on_key_release(key, modifiers):
-    if key == arcade.key.RIGHT or key == arcade.key.LEFT:
+    if key == arcade.key.RIGHT:
         for part in part_list:
-            part.change_x = 0
+            part.change_x -= MOTOR_SPEED
+    if key == arcade.key.LEFT:
+        for part in part_list:
+            part.change_x += MOTOR_SPEED
 
 
 def on_mouse_press(x, y, button, modifiers):
@@ -126,4 +129,3 @@ def on_mouse_release(x, y, button, modifiers):
 
 if __name__ == '__main__':
     setup()
-    
