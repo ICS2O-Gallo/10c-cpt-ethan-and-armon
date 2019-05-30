@@ -6,8 +6,13 @@ WIDTH = 640
 HEIGHT = 480
 SCALE = 0.3
 
-MOTOR_SPEED = 5
+MOTOR_SPEED = 0.15
+MOTOR_SPEED_CAP = 10
 
+
+# Conditional varioobles:
+Accelerate = False
+Decelerate = False
 
 class Dust(object):
     # DDDDDDDOST
@@ -52,6 +57,28 @@ body = arcade.Sprite("images/motorcycle_drawing_new.png", SCALE)
 body.center_x = 50; body.center_y = 50
 part_list.append(body)
 
+# motorcycle movement:
+def change_speed():
+    for part in part_list:
+        part.change_x -= 0.05
+
+        if Accelerate:
+            part.change_x += MOTOR_SPEED
+        if Decelerate:
+            part.change_x -= MOTOR_SPEED  # we brake quicker
+            if part.change_x < -5:
+                part.change_x = -5
+        else:
+            if part.change_x < -1:
+                part.change_x += 0.3
+                if part.change_x > -1 and Accelerate == False:
+                    part.change_x = -1
+
+        if part.change_x > MOTOR_SPEED_CAP:
+            part.change_x = MOTOR_SPEED_CAP
+
+        # update the part:
+        part.update()
 
 """ Run the actual game """
 
@@ -77,8 +104,7 @@ def update(delta_time):
     for particle in dust_list:
         particle.update()
 
-    for part in part_list:
-        part.update()
+    change_speed()
 
 
 def on_draw():
@@ -102,21 +128,21 @@ def on_draw():
 
 
 def on_key_press(key, modifiers):
+    global Accelerate, Decelerate
+
     if key == arcade.key.RIGHT:
-        for part in part_list:
-            part.change_x += MOTOR_SPEED
+        Accelerate = True
     if key == arcade.key.LEFT:
-        for part in part_list:
-            part.change_x -=MOTOR_SPEED
+        Decelerate = True
 
 
 def on_key_release(key, modifiers):
+    global Accelerate, Decelerate
+
     if key == arcade.key.RIGHT:
-        for part in part_list:
-            part.change_x -= MOTOR_SPEED
+        Accelerate = False
     if key == arcade.key.LEFT:
-        for part in part_list:
-            part.change_x += MOTOR_SPEED
+        Decelerate = False
 
 
 def on_mouse_press(x, y, button, modifiers):
@@ -129,3 +155,4 @@ def on_mouse_release(x, y, button, modifiers):
 
 if __name__ == '__main__':
     setup()
+    
