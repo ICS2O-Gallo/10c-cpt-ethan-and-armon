@@ -4,6 +4,9 @@ import arcade
 
 WIDTH = 640
 HEIGHT = 480
+SCALE = 0.15
+
+MOTOR_SPEED = 5
 
 
 class Dust(object):
@@ -30,6 +33,9 @@ class Dust(object):
             self.__init__()
 
 
+""" initiate the stuffses """
+
+
 def draw_ground():
     arcade.draw_lrtb_rectangle_filled(0, WIDTH, HEIGHT/6, 0, arcade.color.LIGHT_BROWN)
 
@@ -38,6 +44,16 @@ dust_list = []
 for particle in range(30):
     particle = Dust()
     dust_list.append(particle)
+
+# create the motorcycle parts:
+part_list = arcade.SpriteList()
+
+body = arcade.Sprite("images/motorcycle_drawing_new.png", SCALE)
+body.center_x = 50; body.center_y = 50
+part_list.append(body)
+
+
+""" Run the actual game """
 
 
 def setup():
@@ -61,28 +77,48 @@ def update(delta_time):
     for particle in dust_list:
         particle.update()
 
+    for part in part_list:
+        part.update()
+
 
 def on_draw():
     arcade.start_render()
 
+    # Draw far dost:
+    for particle in dust_list:
+        if particle.speed >= -2:
+            particle.draw()
+
     # Draw The Ground (OH REALLY?)
     draw_ground()
 
-    # Draw Dust
+    for part in part_list:
+        part.draw()
+
+    # Draw close Dost
     for particle in dust_list:
-        particle.draw()
+        if particle.speed < -2:
+            particle.draw()
 
 
 def on_key_press(key, modifiers):
-    pass
+    if key == arcade.key.RIGHT:
+        for part in part_list:
+            part.change_x = MOTOR_SPEED
+    if key == arcade.key.LEFT:
+        for part in part_list:
+            part.change_x = -MOTOR_SPEED
 
 
 def on_key_release(key, modifiers):
-    pass
+    if key == arcade.key.RIGHT or key == arcade.key.LEFT:
+        for part in part_list:
+            part.change_x = 0
 
 
 def on_mouse_press(x, y, button, modifiers):
     pass
+
 
 def on_mouse_release(x, y, button, modifiers):
     pass
@@ -90,4 +126,4 @@ def on_mouse_release(x, y, button, modifiers):
 
 if __name__ == '__main__':
     setup()
-
+    
