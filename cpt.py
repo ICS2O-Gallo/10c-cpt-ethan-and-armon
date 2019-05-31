@@ -121,7 +121,7 @@ def update(delta_time):
     for particle in dust_list:
         particle.update()
 
-    change_speed()
+    update_motorcycle()
 
 
 def on_draw():
