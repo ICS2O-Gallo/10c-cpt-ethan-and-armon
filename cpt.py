@@ -1,18 +1,20 @@
 import random
 import arcade
+import time
 
 
 WIDTH = 1366
 HEIGHT = 710
-SCALE = 0.3
+SCALE = HEIGHT/WIDTH/1.1
 
-MOTOR_SPEED = 0.15
+MOTOR_SPEED = 0.2
 MOTOR_SPEED_CAP = 10
 
 
 # Conditional varioobles:
 Accelerate = False
 Decelerate = False
+Second = 0
 
 class Dust(object):
     # DDDDDDDOST
@@ -38,7 +40,10 @@ class Dust(object):
             self.__init__()
 
 
-""" initiate the stuffses """
+""" make the fanctions """
+
+def gameover():
+    exit(1)
 
 
 def draw_ground():
@@ -50,15 +55,20 @@ for particle in range(30):
     particle = Dust()
     dust_list.append(particle)
 
+""" initiate the stuffses """
+
 # create the motorcycle parts:
+
 part_list = arcade.SpriteList()
 
 body = arcade.Sprite("images/motorcycle_drawing_new.png", SCALE)
 body.center_x = WIDTH/8; body.center_y = HEIGHT/8
 part_list.append(body)
 
+
 # motorcycle movement:
-def change_speed():
+
+def update_motorcycle():
     for part in part_list:
         part.change_x -= 0.05
 
@@ -66,8 +76,8 @@ def change_speed():
             part.change_x += MOTOR_SPEED
         if Decelerate:
             part.change_x -= 1.5*MOTOR_SPEED  # we brake quicker
-            if part.change_x < -5:
-                part.change_x = -5
+            if part.change_x < -MOTOR_SPEED_CAP:
+                part.change_x = -MOTOR_SPEED_CAP
         else:
             if part.change_x < -1:
                 part.change_x += 0.2
@@ -77,6 +87,13 @@ def change_speed():
         if part.change_x > MOTOR_SPEED_CAP:
             part.change_x = MOTOR_SPEED_CAP
 
+        # check if off the left screen:
+        global Second
+        if part.center_x < 0:
+            if Second >= 120:
+                gameover()
+                Second = 0
+            Second += 1
         # update the part:
         part.update()
 
@@ -155,4 +172,3 @@ def on_mouse_release(x, y, button, modifiers):
 
 if __name__ == '__main__':
     setup()
-    
