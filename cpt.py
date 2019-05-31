@@ -1,19 +1,23 @@
 import random
 import arcade
-import time
 
 
 WIDTH = 1366
 HEIGHT = 710
 SCALE = HEIGHT/WIDTH/1.1
+RIGHTCAP = WIDTH*0.85
 
-MOTOR_SPEED = 0.2
+MOTOR_SPEED = 0.3
 MOTOR_SPEED_CAP = 10
+MOTOR_JUMP = 2
+MOTOR_FALL = -2
 
 
 # Conditional varioobles:
 Accelerate = False
 Decelerate = False
+Jumping = False
+Falling = False
 Second = 0
 
 class Dust(object):
@@ -40,22 +44,12 @@ class Dust(object):
             self.__init__()
 
 
-""" make the fanctions """
-
-def gameover():
-    exit(1)
-
-
-def draw_ground():
-    arcade.draw_lrtb_rectangle_filled(0, WIDTH, HEIGHT/6, 0, arcade.color.LIGHT_BROWN)
-
-
+""" initiate the stuffses """
 dust_list = []
 for particle in range(30):
     particle = Dust()
     dust_list.append(particle)
 
-""" initiate the stuffses """
 
 # create the motorcycle parts:
 
@@ -65,6 +59,35 @@ body = arcade.Sprite("images/motorcycle_drawing_new.png", SCALE)
 body.center_x = WIDTH/8; body.center_y = HEIGHT/8
 part_list.append(body)
 
+""" make the fanctions """
+
+
+def jump(part):
+    global Falling, Jumping
+
+    if Jumping:
+        part.change_angle = MOTOR_JUMP
+        part.change_y = MOTOR_JUMP*4
+        if part.center_y >= HEIGHT/3:
+            Jumping = False
+            Falling = True
+
+    if Falling:
+        part.change_angle = MOTOR_FALL
+        part.change_y = MOTOR_FALL*4
+        if part.center_y <= HEIGHT/8:
+            part.change_angle = 0
+            part.change_y = 0
+            Falling = False
+
+
+
+def game_over():
+    exit(1)
+
+
+def draw_ground():
+    arcade.draw_lrtb_rectangle_filled(0, WIDTH, HEIGHT/6, 0, arcade.color.LIGHT_BROWN)
 
 # motorcycle movement:
 
@@ -72,30 +95,46 @@ def update_motorcycle():
     for part in part_list:
         part.change_x -= 0.05
 
+
         if Accelerate:
             part.change_x += MOTOR_SPEED
         if Decelerate:
             part.change_x -= 1.5*MOTOR_SPEED  # we brake quicker
-            if part.change_x < -MOTOR_SPEED_CAP:
-                part.change_x = -MOTOR_SPEED_CAP
         else:
-            if part.change_x < -1:
+            if part.change_x < -2:
                 part.change_x += 0.2
-                if part.change_x > -1 and Accelerate == False:
-                    part.change_x = -1
+                if part.change_x > -2 and Accelerate == False:
+                    part.change_x = -2
 
         if part.change_x > MOTOR_SPEED_CAP:
             part.change_x = MOTOR_SPEED_CAP
+        if part.change_x < -MOTOR_SPEED_CAP:
+            part.change_x = -MOTOR_SPEED_CAP
 
-        # check if off the left screen:
+        # Jomp!
+
+        jump(part)
+
+        # check if off the loft side of the screen:
         global Second
         if part.center_x < 0:
             if Second >= 120:
-                gameover()
+                game_over()
                 Second = 0
             Second += 1
+
+        # check if near the roite side of the screen
+        if part.center_x > RIGHTCAP:
+            part.change_x -= 2.5*MOTOR_SPEED
+
+        # TESTING:
+
+
+
+
         # update the part:
         part.update()
+
 
 """ Run the actual game """
 
@@ -145,12 +184,15 @@ def on_draw():
 
 
 def on_key_press(key, modifiers):
-    global Accelerate, Decelerate
+    global Accelerate, Decelerate, Jumping
 
-    if key == arcade.key.RIGHT:
-        Accelerate = True
-    if key == arcade.key.LEFT:
-        Decelerate = True
+    if key == arcade.key.UP:
+        Jumping = True
+    else:
+        if key == arcade.key.RIGHT:
+            Accelerate = True
+        if key == arcade.key.LEFT:
+            Decelerate = True
 
 
 def on_key_release(key, modifiers):
@@ -172,3 +214,4 @@ def on_mouse_release(x, y, button, modifiers):
 
 if __name__ == '__main__':
     setup()
+
