@@ -9,8 +9,9 @@ RIGHTCAP = WIDTH*0.85
 
 MOTOR_SPEED = 0.3
 MOTOR_SPEED_CAP = 10
-MOTOR_JUMP = 2
-MOTOR_FALL = -2
+MOTOR_ANGLE = 1
+MOTOR_JUMP = 3
+MOTOR_FALL = -4
 
 
 # Conditional varioobles:
@@ -31,14 +32,14 @@ class Dust(object):
         # set dust width to be able to delete it off screen
         self.dust_radius = 8
 
-        self.speed = random.randrange(-7, -1)
-        self.fall = random.uniform(-0.3, -0.1)
+        self.speed = random.randrange(10, 17)
+        self.fall = random.uniform(-0.5, -0.1)
 
     def draw(self):
         arcade.draw_circle_filled(self.x, self.y, self.dust_radius, arcade.color.EARTH_YELLOW)
 
     def update(self):
-        self.x += self.speed
+        self.x -= self.speed
         self.y += self.fall
         if self.x < -self.dust_radius or self.y < -self.dust_radius:
             self.__init__()
@@ -55,10 +56,18 @@ for particle in range(30):
 
 part_list = arcade.SpriteList()
 
+# create the tires:
+tire_behind = arcade.Sprite("images/motorcycle_wheel.png", SCALE/1.5)
+tire_front = arcade.Sprite("images/motorcycle_wheel.png", SCALE/1.5)
+tire_behind.center_x = WIDTH/8 - 30; tire_behind.center_y = HEIGHT/12
+tire_front.center_x = WIDTH/8 + 75; tire_front.center_y = HEIGHT/22
+part_list.append(tire_behind); part_list.append(tire_front)
+
+# create the body
+
 body = arcade.Sprite("images/motorcycle_drawing_new.png", SCALE)
 body.center_x = WIDTH/8; body.center_y = HEIGHT/8
 part_list.append(body)
-
 """ make the fanctions """
 
 
@@ -66,19 +75,33 @@ def jump(part):
     global Falling, Jumping
 
     if Jumping:
-        part.change_angle = MOTOR_JUMP
-        part.change_y = MOTOR_JUMP*4
-        if part.center_y >= HEIGHT/3:
+
+        if part.center_y >= HEIGHT/5:
+            part.change_angle = MOTOR_ANGLE/2
+            part.change_y = MOTOR_JUMP * 2
+        else:
+            part.change_angle = MOTOR_ANGLE
+            part.change_y = MOTOR_JUMP * 4
+
+        if part.center_y >= HEIGHT/4:
             Jumping = False
             Falling = True
 
     if Falling:
-        part.change_angle = MOTOR_FALL
-        part.change_y = MOTOR_FALL*4
+        Jumping = False
+        if part.center_y >= HEIGHT/5:
+            part.change_angle = -MOTOR_ANGLE/2
+            part.change_y += (MOTOR_FALL/10)
+        else:
+            part.change_angle = -MOTOR_ANGLE
+            part.change_y = MOTOR_FALL * 4
+
         if part.center_y <= HEIGHT/8:
-            part.change_angle = 0
+            part.change_angle = 4
             part.change_y = 0
-            Falling = False
+            if part.angle >= 0:
+                part.change_angle = 0
+                Falling = False
 
 
 
@@ -99,7 +122,7 @@ def update_motorcycle():
         if Accelerate:
             part.change_x += MOTOR_SPEED
         if Decelerate:
-            part.change_x -= 1.5*MOTOR_SPEED  # we brake quicker
+            part.change_x -= 2*MOTOR_SPEED  # we brake quicker
         else:
             if part.change_x < -2:
                 part.change_x += 0.2
@@ -126,6 +149,18 @@ def update_motorcycle():
         # check if near the roite side of the screen
         if part.center_x > RIGHTCAP:
             part.change_x -= 2.5*MOTOR_SPEED
+
+        # manage dost (in motorcycle function, WWHHHHATTTTT?????)
+        for particle in dust_list:
+            if Accelerate:
+                particle.speed += MOTOR_SPEED/1.5
+            if Decelerate:
+                particle.speed -= MOTOR_SPEED
+            if particle.speed >= 30:
+                particle.speed -= MOTOR_SPEED*2
+            if particle.speed < 10:
+                particle.speed += MOTOR_SPEED*4
+
 
         # TESTING:
 
@@ -187,7 +222,8 @@ def on_key_press(key, modifiers):
     global Accelerate, Decelerate, Jumping
 
     if key == arcade.key.UP:
-        Jumping = True
+        if Falling == False:
+            Jumping = True
     else:
         if key == arcade.key.RIGHT:
             Accelerate = True
@@ -215,3 +251,36 @@ def on_mouse_release(x, y, button, modifiers):
 if __name__ == '__main__':
     setup()
 
+
+
+
+"""Elevate
+def jump(part):
+    global Falling, Jumping
+
+    if Jumping:
+
+        if part.center_y >= HEIGHT/4:
+            part.change_angle = MOTOR_ANGLE/2
+            part.change_y = MOTOR_JUMP * 2
+        else:
+            part.change_angle = MOTOR_ANGLE
+            part.change_y = MOTOR_JUMP * 4
+
+        if part.center_y >= HEIGHT/3:
+            Jumping = False
+            Falling = True
+
+    if Falling:
+        if part.center_y >= HEIGHT/4:
+            part.change_angle = -MOTOR_ANGLE/2
+            part.change_y -= (MOTOR_FALL/10)
+        else:
+            part.change_angle = -MOTOR_ANGLE
+            part.change_y = MOTOR_FALL * 4
+
+        if part.center_y <= HEIGHT/8:
+            part.change_angle = 0
+            part.change_y = 0
+            Falling = False
+"""
