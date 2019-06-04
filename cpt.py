@@ -179,15 +179,17 @@ def set_wheels(wheel1, wheel2, body):
     """complicated math to do stoff"""
     wheel1.center_x = body.center_x + 94.55337264*(math.cos(math.radians(body.angle + 205.977886)))
     wheel1.center_y = body.center_y + 94.55337264*(math.sin(math.radians(body.angle + 205.977886)))
-    print(body.center_x - wheel1.center_x)
-    print(body.center_y - wheel1.center_y)
 
     # front tire
-
     wheel2.center_x = body.center_x + 72.90638023*(math.cos(math.radians(body.angle + 325.3835437)))
     wheel2.center_y = body.center_y + 72.90638023*(math.sin(math.radians(body.angle + 325.3835437)))
-    print(body.angle)
 
+    if Accelerate:
+        wheel1.change_angle -= 5
+        wheel2.change_angle -= 5
+    if Decelerate:
+        wheel1.change_angle += 5
+        wheel2.change_angle += 5
 """ Run the actual game """
 
 
