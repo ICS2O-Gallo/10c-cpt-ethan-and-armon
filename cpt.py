@@ -58,13 +58,13 @@ for particle in range(30):
 part_list = arcade.SpriteList()
 
 # create the tires:
-tire_behind = arcade.Sprite("images/motorcycle_wheel.png", SCALE)
-tire_front = arcade.Sprite("images/motorcycle_wheel.png", SCALE)
+tire_behind = arcade.Sprite("images/wheel.png", SCALE)
+tire_front = arcade.Sprite("images/wheel.png", SCALE)
 part_list.append(tire_behind); part_list.append(tire_front)
 
 # create the body
 
-body = arcade.Sprite("images/motorcycle_drawing_new.png", SCALE)
+body = arcade.Sprite("images/motorcycle.png", SCALE)
 body.center_x = WIDTH/8; body.center_y = HEIGHT/8
 part_list.append(body)
 """ make the fanctions """
@@ -177,6 +177,8 @@ def update_motorcycle():
 
 def set_wheels(wheel1, wheel2, body):
     """complicated math to do stoff"""
+
+    # back tire
     wheel1.center_x = body.center_x + 94.55337264*(math.cos(math.radians(body.angle + 205.977886)))
     wheel1.center_y = body.center_y + 94.55337264*(math.sin(math.radians(body.angle + 205.977886)))
 
@@ -185,11 +187,15 @@ def set_wheels(wheel1, wheel2, body):
     wheel2.center_y = body.center_y + 72.90638023*(math.sin(math.radians(body.angle + 325.3835437)))
 
     if Accelerate:
-        wheel1.change_angle -= 5
-        wheel2.change_angle -= 5
-    if Decelerate:
-        wheel1.change_angle += 5
-        wheel2.change_angle += 5
+        tire_speed = -60
+    elif Decelerate:
+        tire_speed = -20
+    else:
+        tire_speed = -40
+
+    wheel1.change_angle = wheel2.change_angle = tire_speed
+
+
 """ Run the actual game """
 
 
