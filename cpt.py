@@ -1,6 +1,9 @@
 import random
 import arcade
 
+x = body.center_x + 72.906cos(body.angle-34.6)
+y = body.center_y - 72.906sin(body.angle-34.6)
+
 
 WIDTH = 1366
 HEIGHT = 710
