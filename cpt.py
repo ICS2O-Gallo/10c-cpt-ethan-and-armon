@@ -1,8 +1,6 @@
 import random
 import arcade
-
-x = body.center_x + 72.906cos(body.angle-34.6)
-y = body.center_y - 72.906sin(body.angle-34.6)
+import math
 
 
 WIDTH = 1366
@@ -60,10 +58,8 @@ for particle in range(30):
 part_list = arcade.SpriteList()
 
 # create the tires:
-tire_behind = arcade.Sprite("images/motorcycle_wheel.png", SCALE/1.5)
-tire_front = arcade.Sprite("images/motorcycle_wheel.png", SCALE/1.5)
-tire_behind.center_x = WIDTH/8 - 30; tire_behind.center_y = HEIGHT/12
-tire_front.center_x = WIDTH/8 + 75; tire_front.center_y = HEIGHT/22
+tire_behind = arcade.Sprite("images/motorcycle_wheel.png", SCALE)
+tire_front = arcade.Sprite("images/motorcycle_wheel.png", SCALE)
 part_list.append(tire_behind); part_list.append(tire_front)
 
 # create the body
@@ -118,61 +114,79 @@ def draw_ground():
 # motorcycle movement:
 
 def update_motorcycle():
-    for part in part_list:
-        part.change_x -= 0.05
+    part = part_list[2]
+    part.change_x -= 0.05
 
 
+    if Accelerate:
+        part.change_x += MOTOR_SPEED
+    if Decelerate:
+        part.change_x -= 2*MOTOR_SPEED  # we brake quacker
+    else:
+        if part.change_x < -2:
+            part.change_x += 0.2
+            if part.change_x > -2 and Accelerate == False:
+                part.change_x = -2
+
+    # make sure not goin too darnerino fasterino
+
+    if part.change_x > MOTOR_SPEED_CAP:
+        part.change_x = MOTOR_SPEED_CAP
+    if part.change_x < -MOTOR_SPEED_CAP:
+        part.change_x = -MOTOR_SPEED_CAP
+
+    # Jomp!
+
+    jump(part)
+
+    # check if off the loft side of the screen:
+    global Second
+    if part.center_x < 0:
+        if Second >= 120:
+            game_over()
+            Second = 0
+        Second += 1
+
+    # check if near the roite side of the screen
+    if part.center_x > RIGHTCAP:
+        part.change_x -= 2.5*MOTOR_SPEED
+
+    # manage dost (in motorcycle function, WWHHHHATTTTT?????)
+    for particle in dust_list:
         if Accelerate:
-            part.change_x += MOTOR_SPEED
+            particle.speed += MOTOR_SPEED/1.5
         if Decelerate:
-            part.change_x -= 2*MOTOR_SPEED  # we brake quicker
-        else:
-            if part.change_x < -2:
-                part.change_x += 0.2
-                if part.change_x > -2 and Accelerate == False:
-                    part.change_x = -2
-
-        if part.change_x > MOTOR_SPEED_CAP:
-            part.change_x = MOTOR_SPEED_CAP
-        if part.change_x < -MOTOR_SPEED_CAP:
-            part.change_x = -MOTOR_SPEED_CAP
-
-        # Jomp!
-
-        jump(part)
-
-        # check if off the loft side of the screen:
-        global Second
-        if part.center_x < 0:
-            if Second >= 120:
-                game_over()
-                Second = 0
-            Second += 1
-
-        # check if near the roite side of the screen
-        if part.center_x > RIGHTCAP:
-            part.change_x -= 2.5*MOTOR_SPEED
-
-        # manage dost (in motorcycle function, WWHHHHATTTTT?????)
-        for particle in dust_list:
-            if Accelerate:
-                particle.speed += MOTOR_SPEED/1.5
-            if Decelerate:
-                particle.speed -= MOTOR_SPEED
-            if particle.speed >= 30:
-                particle.speed -= MOTOR_SPEED*2
-            if particle.speed < 10:
-                particle.speed += MOTOR_SPEED*4
+            particle.speed -= MOTOR_SPEED
+        if particle.speed >= 30:
+            particle.speed -= MOTOR_SPEED*2
+        if particle.speed < 10:
+            particle.speed += MOTOR_SPEED*4
 
 
-        # TESTING:
+    # very camplicated math thing that I made to make sure tires are at the right spot.
+    # won't wurk if the screeen resolution is different so DON'T CHANGE IT JESUS CHRIST
+    set_wheels(part_list[0], part_list[1], part_list[2])
+    # TESTING:
 
 
 
-
-        # update the part:
+    # update the part:
+    for part in part_list:
         part.update()
 
+
+def set_wheels(wheel1, wheel2, body):
+    """complicated math to do stoff"""
+    wheel1.center_x = body.center_x + 94.55337264*(math.cos(math.radians(body.angle + 205.977886)))
+    wheel1.center_y = body.center_y + 94.55337264*(math.sin(math.radians(body.angle + 205.977886)))
+    print(body.center_x - wheel1.center_x)
+    print(body.center_y - wheel1.center_y)
+
+    # front tire
+
+    wheel2.center_x = body.center_x + 72.90638023*(math.cos(math.radians(body.angle + 325.3835437)))
+    wheel2.center_y = body.center_y + 72.90638023*(math.sin(math.radians(body.angle + 325.3835437)))
+    print(body.angle)
 
 """ Run the actual game """
 
@@ -260,20 +274,16 @@ if __name__ == '__main__':
 """Elevate
 def jump(part):
     global Falling, Jumping
-
     if Jumping:
-
         if part.center_y >= HEIGHT/4:
             part.change_angle = MOTOR_ANGLE/2
             part.change_y = MOTOR_JUMP * 2
         else:
             part.change_angle = MOTOR_ANGLE
             part.change_y = MOTOR_JUMP * 4
-
         if part.center_y >= HEIGHT/3:
             Jumping = False
             Falling = True
-
     if Falling:
         if part.center_y >= HEIGHT/4:
             part.change_angle = -MOTOR_ANGLE/2
@@ -281,7 +291,6 @@ def jump(part):
         else:
             part.change_angle = -MOTOR_ANGLE
             part.change_y = MOTOR_FALL * 4
-
         if part.center_y <= HEIGHT/8:
             part.change_angle = 0
             part.change_y = 0
