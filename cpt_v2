@@ -30,6 +30,8 @@ Decelerate = False
 Jumping = False
 Falling = False
 Second = 0
+# this one's a funny one
+Fly_Carole_Fly = False
 
 # timer for seconds since stort:
 timer = 0
@@ -88,14 +90,38 @@ obstacle_list = arcade.SpriteList()
 part_list = arcade.SpriteList()
 
 # create the toires:
-tire_behind = arcade.Sprite("images/wheel.png", SCALE)
-tire_front = arcade.Sprite("images/wheel.png", SCALE)
+tire_behind = arcade.Sprite('images/wheel.png', SCALE)
+tire_front = arcade.Sprite('images/wheel.png', SCALE)
 part_list.append(tire_behind); part_list.append(tire_front)
 
 # create the boody
-body = arcade.Sprite("images/motorcycle.png", SCALE)
+body = arcade.Sprite('images/motorcycle.png', SCALE)
 body.center_x = MOTOR_X; body.center_y = MOTOR_Y
 part_list.append(body)
+
+# create carole (yes. that is his name)
+carole = arcade.Sprite('images/carole.png', SCALE/2)
+part_list.append(carole)
+
+""" moke the FUNctions """
+
+def fly_carole_fly():
+    carole = part_list[3]
+    body = part_list[2]
+    carole.center_x = body.center_x
+    if Jumping:
+        carole.change_y += 4
+    elif Falling:
+        carole.change_y -= 1
+    if carole.center_y < body.center_y:
+        global Fly_Carole_Fly
+
+        carole.change_y = 0
+        carole.center_y = body.center_y + 10
+        Fly_Carole_Fly = False
+    carole.angle = body.angle
+
+
 
 """ make the fanctions """
 
@@ -176,11 +202,10 @@ def update_motorcycle():
     body = part_list[2]
     body.change_x -= 0.05
 
-
     if Accelerate:
         body.change_x += MOTOR_SPEED
     if Decelerate:
-        body.change_x -= 2*MOTOR_SPEED  # we brake quacker
+        body.change_x -= 2*MOTOR_SPEED# we brake quacker
     else:
         if body.change_x < -2:
             body.change_x += 0.2
@@ -213,6 +238,8 @@ def update_motorcycle():
     # very camplicated math thing that I made to make sure tires are at the right spot.
     # won't wurk if the screen resolution is different so DON'T CHANGE IT JESUS CHRIST
     set_wheels(part_list[0], part_list[1], body)
+    if Fly_Carole_Fly == False:
+        set_carole(part_list[3], body)
     # TESTING:
 
 
@@ -244,6 +271,12 @@ def set_wheels(wheel1, wheel2, body):
 
     wheel1.change_angle = wheel2.change_angle = tire_speed
 
+def set_carole(carole, body):
+
+    carole.center_x = body.center_x
+    carole.center_y = body.center_y + 10
+    carole.angle = body.angle
+
 
 """ Run the actual game """
 
@@ -270,6 +303,8 @@ def update(delta_time):
     for particle in dust_list:
         particle.update()
 
+    if Fly_Carole_Fly:
+        fly_carole_fly()
     update_obstacles()
     update_motorcycle()
     check_motor_obstacle_collision()
@@ -301,9 +336,11 @@ def on_draw():
 
 
 def on_key_press(key, modifiers):
-    global Accelerate, Decelerate, Jumping
+    global Accelerate, Decelerate, Jumping, Fly_Carole_Fly
 
     if key == arcade.key.UP:
+        if Jumping == True:
+            Fly_Carole_Fly = True
         if Falling == False:
             Jumping = True
     else:
@@ -360,4 +397,8 @@ def jump(part):
             part.change_angle = 0
             part.change_y = 0
             Falling = False
+"""
+
+"""FLY CAROLE FLY
+
 """
