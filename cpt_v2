@@ -398,7 +398,3 @@ def jump(part):
             part.change_y = 0
             Falling = False
 """
-
-"""FLY CAROLE FLY
-
-"""
