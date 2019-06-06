@@ -1,6 +1,5 @@
 import random
 import arcade
-import time
 import math
 import numpy
 
@@ -108,18 +107,22 @@ part_list.append(carole)
 def fly_carole_fly():
     carole = part_list[3]
     body = part_list[2]
-    carole.center_x = body.center_x
-    if Jumping:
+    carole.change_x += 0.1
+    if Jumping and 0 <= carole.change_y:
         carole.change_y += 4
-    elif Falling:
+    if Falling:
         carole.change_y -= 1
-    if carole.center_y < body.center_y:
+    if carole.center_y < body.center_y - 10:
         global Fly_Carole_Fly
 
-        carole.change_y = 0
-        carole.center_y = body.center_y + 10
-        Fly_Carole_Fly = False
-    carole.angle = body.angle
+        catch = arcade.check_for_collision(carole, part_list[2])
+        if catch:
+            carole.change_x = 0
+            carole.change_y = 0
+            carole.center_y = body.center_y + 10
+            Fly_Carole_Fly = False
+        else:
+            game_over()
 
 
 
