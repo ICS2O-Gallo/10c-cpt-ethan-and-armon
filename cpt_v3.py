@@ -334,16 +334,12 @@ def setup():
 
 
 def update(delta_time):
-    print('carole_is_dying:')
-    print(carole_is_dying)
     global timer
 
     for particle in dust_list:
         particle.update()
 
     if not carole_is_dying:
-        print('fly_carole_fly:')
-        print(carole_is_flying)
         if carole_is_flying:
             fly_carole_fly()
         update_obstacles()
