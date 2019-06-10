@@ -1,2 +1,3 @@
-# 10c-cpt-ethan-and-armon
-10c-cpt-ethan-and-armon created by GitHub Classroom
+# Road To Eternity
+
+A post-apocalyptic side scrolling game where you must escape a fast approaching enemy while dodging obstacles
