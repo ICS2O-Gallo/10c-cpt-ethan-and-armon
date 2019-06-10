@@ -24,14 +24,14 @@ OBSTACLE_SPEED = -10
 GROUND = HEIGHT/6
 
 # Conditional varioobles:
-Accelerate = False
-Decelerate = False
-Jumping = False
-Falling = False
-Carole_Is_Dying = False
-Second = 0
+accelerate = False
+decelerate = False
+jumping = False
+falling = False
+carole_is_dying = False
+second = 0
 # cheats and fun stuff
-Fly_Carole_Fly = False
+carole_is_flying = False
 ddup = True # death do us part (as in carole and teh motorcycle)
 
 
@@ -64,9 +64,9 @@ class Dust(object):
         arcade.draw_circle_filled(self.x, self.y, self.dust_radius, arcade.color.EARTH_YELLOW)
 
     def update(self):
-        if Accelerate:
+        if accelerate:
             self.speed += MOTOR_SPEED/1.5
-        if Decelerate:
+        if decelerate:
             self.speed -= MOTOR_SPEED
         if self.speed >= 30:
             self.speed -= MOTOR_SPEED*2
@@ -111,25 +111,25 @@ def fly_carole_fly():
     carole = part_list[3]
     body = part_list[2]
     carole.change_x += 0.1
-    if Jumping and 0 <= carole.change_y:
+    if jumping and 0 <= carole.change_y:
         carole.change_y += 3.6
-    if Falling:
+    if falling:
         carole.change_y -= 1
     if carole.center_y <= body.center_y - 18:
-        global Fly_Carole_Fly
+        global carole_is_flying
 
         carole.change_x = 0
         carole.change_y = 0
         carole.center_y = body.center_y + 10
         catch = arcade.check_for_collision(carole, part_list[2])
         if catch:
-            if carole.center_x <= body.center_x - carole._width/2 or carole.center_x >= body.center_x + carole._width/2:
+            if carole.center_x <= body.center_x - 50 or carole.center_x >= body.center_x + 50:
                 game_over()
 
         else:
             game_over()
 
-        Fly_Carole_Fly = False
+        carole_is_flying = False
 
 
 
@@ -139,7 +139,7 @@ def fly_carole_fly():
 """ make the fanctions """
 
 def game_over():
-    global Carole_Is_Dying
+    global carole_is_dying
 
     carole = part_list[3]
 
@@ -147,7 +147,7 @@ def game_over():
         carole.change_angle = 20
         carole.change_x = -20
         carole.center_y = GROUND
-        Carole_Is_Dying = True
+        carole_is_dying = True
         carole.update()
         if carole.center_x < -WIDTH:
             exit(1)
@@ -169,7 +169,7 @@ def check_carole_collision():
 def create_obstacle():
     type = obstacle_images[random.randint(0, 1)]
     obstacle = arcade.Sprite(type, SCALE*5/3)
-    obstacle.center_x = WIDTH+obstacle._width
+    obstacle.center_x = WIDTH + 66
     if type == obstacle_images[0]:
         obstacle.center_y = GROUND - 65
     elif type == obstacle_images[1]:
@@ -189,7 +189,7 @@ def update_obstacles():
 
     for obstacle in obstacle_list:
         obstacle.center_x += OBSTACLE_SPEED - timer/600
-        if obstacle.center_x + obstacle._width/2 <= 0:
+        if obstacle.center_x + 33 <= 0:
             reset_obstacle(obstacle)
 
 
@@ -199,9 +199,9 @@ def draw_ground():
 
 # next section is all about moturcycle movement:
 def jump(body):
-    global Falling, Jumping
+    global falling, jumping
 
-    if Jumping:
+    if jumping:
 
         if body.center_y >= MOTOR_JUMPCAP_SLOW:
             body.change_angle = MOTOR_ANGLE/2
@@ -211,11 +211,11 @@ def jump(body):
             body.change_y = MOTOR_JUMP
 
         if body.center_y >= HEIGHT/4:
-            Jumping = False
-            Falling = True
+            jumping = False
+            falling = True
 
-    if Falling:
-        Jumping = False
+    if falling:
+        jumping = False
         if body.center_y >= MOTOR_JUMPCAP_SLOW:
             body.change_angle = -MOTOR_ANGLE/2
             body.change_y += (MOTOR_FALL/10)
@@ -229,21 +229,22 @@ def jump(body):
             body.change_y = 0
             if body.angle >= 0:
                 body.change_angle = 0
-                Falling = False
+                falling = False
 
 
 def update_motorcycle():
+
     body = part_list[2]
     body.change_x -= 0.05
 
-    if Accelerate:
+    if accelerate:
         body.change_x += MOTOR_SPEED
-    if Decelerate:
+    if decelerate:
         body.change_x -= 2*MOTOR_SPEED# we brake quacker
     else:
         if body.change_x < -2:
             body.change_x += 0.2
-            if body.change_x > -2 and Accelerate == False:
+            if body.change_x > -2 and accelerate == False:
                 body.change_x = -2
 
     # make sure not guin too darned fasterino
@@ -256,14 +257,14 @@ def update_motorcycle():
     jump(body)
 
     # check if off the loft side of the screen
-    global Second
-    if body.center_x < 0:
-        if Second >= 120:
+    global second
+    if carole.center_x < 0:
+        if second >= 120:
             game_over()
-            Second = 0
-        Second += 1
+            second = 0
+        second += 1
     else:
-        Second = 0
+        second = 0
 
     # check if near the roite side of the screen
     if body.center_x > RIGHTCAP:
@@ -272,7 +273,7 @@ def update_motorcycle():
     # very camplicated math thing that I made to make sure tires are at the right spot.
     # won't wurk if the screen resolution is different so DON'T CHANGE IT JESUS CHRIST
     set_wheels(part_list[0], part_list[1], body)
-    if Fly_Carole_Fly == False:
+    if carole_is_flying == False:
         set_carole(part_list[3], body)
     # TESTING:
 
@@ -295,9 +296,9 @@ def set_wheels(wheel1, wheel2, body):
     wheel2.center_y = body.center_y + 94.86832981*(math.sin(math.radians(body.angle + 341.5650512)))
 
     # change how fast it moves
-    if Accelerate:
+    if accelerate:
         tire_speed = -60
-    elif Decelerate:
+    elif decelerate:
         tire_speed = -20
     else:
         tire_speed = -40
@@ -307,7 +308,7 @@ def set_wheels(wheel1, wheel2, body):
 
 def set_carole(carole, body):
 
-    if not Carole_Is_Dying:
+    if not carole_is_dying:
         carole.center_x = body.center_x
         carole.center_y = body.center_y + 10
         carole.angle = body.angle
@@ -333,13 +334,17 @@ def setup():
 
 
 def update(delta_time):
+    print('carole_is_dying:')
+    print(carole_is_dying)
     global timer
 
     for particle in dust_list:
         particle.update()
 
-    if not Carole_Is_Dying:
-        if Fly_Carole_Fly:
+    if not carole_is_dying:
+        print('fly_carole_fly:')
+        print(carole_is_flying)
+        if carole_is_flying:
             fly_carole_fly()
         update_obstacles()
         check_carole_collision()
@@ -374,8 +379,13 @@ def on_draw():
             particle.draw()
 
 
+    # Draw the minu:
+    #if menu == True:
+
+
+
 def on_key_press(key, modifiers):
-    global Accelerate, Decelerate, Jumping, Falling, Fly_Carole_Fly # actooal stuff
+    global accelerate, decelerate, jumping, falling, carole_is_flying # actooal stuff
     global ddup # chets
 
     # cheat codes:
@@ -387,24 +397,24 @@ def on_key_press(key, modifiers):
 
 
     if key == arcade.key.UP:
-        if Jumping == True:
-            Fly_Carole_Fly = True
-        if Falling == False:
-            Jumping = True
+        if jumping == True:
+            carole_is_flying = True
+        if falling == False:
+            jumping = True
     else:
         if key == arcade.key.RIGHT:
-            Accelerate = True
+            accelerate = True
         if key == arcade.key.LEFT:
-            Decelerate = True
+            decelerate = True
 
 
 def on_key_release(key, modifiers):
-    global Accelerate, Decelerate
+    global accelerate, decelerate
 
     if key == arcade.key.RIGHT:
-        Accelerate = False
+        accelerate = False
     if key == arcade.key.LEFT:
-        Decelerate = False
+        decelerate = False
 
 
 def on_mouse_press(x, y, button, modifiers):
