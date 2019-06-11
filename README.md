@@ -1,2 +1,2 @@
-# 10c-cpt-ethan-and-armon
-10c-cpt-ethan-and-armon created by GitHub Classroom
+# Pictures for Road To Eternity
+Drawn by Ethan Alvares
