@@ -24,6 +24,7 @@ OBSTACLE_SPEED = -10
 GROUND = HEIGHT/6
 
 # Conditional varioobles:
+show_menu = True
 accelerate = False
 decelerate = False
 jumping = False
@@ -38,12 +39,56 @@ ddup = True # death do us part (as in carole and teh motorcycle)
 # timer for seconds since stort:
 timer = 0
 
+# keep track of mouse for other functions:
+mouse_x = 0
+mouse_y = 0
+mouse_pressed = False
+mouse_released = False
+
+
 
 # list of possoble images for obstacles (add more maybe?):
 obstacle_images = [
 'images/barrel.png',
 'images/box.png',
 ]
+
+""" classes (not the schule kind, other kind, haha funny joke, wait, no it was terrible, this is going on for too long,
+    how much more space is this gonna take? you're negatively impacting the program stop! seriously, you're gonna lose
+    marks, what are you doing? gosh darnit stop. fine do it."""
+
+class Button(object):
+    # BBBBBBBBBUTTUN
+
+    def __init__(self, center_x, center_y, width, height):
+        self.center_x = center_x
+        self.center_y = center_y
+        self.width = width
+        self.height = height
+        self.color = arcade.color.GRAY
+        self.hover_color = self.color
+        self.pressed_color = self.color
+        self.visible = False
+
+    def draw(self):
+        if self.visible:
+            arcade.draw_rectangle_filled(self.center_x, self.center_y, self.width, self.height, self.color)
+
+    def update(self):
+        # not pressed is 0; hovering is 1; pressed is 2; released is 3
+        if self.center_x - self.width/2 < mouse_x < self.center_x + self.width/2 and \
+        self.center_y - self.height/2 < mouse_y < self.center_y + self.height/2:
+            if mouse_released:
+                return 3
+            elif mouse_pressed:
+                self.color = self.pressed_color
+                return 2
+            else:
+                self.color = self.hover_color
+                return 1
+
+        else:
+            return 0
 
 
 class Dust(object):
@@ -105,6 +150,19 @@ part_list.append(body)
 carole = arcade.Sprite('images/carole.png', SCALE/2)
 part_list.append(carole)
 
+# create signpost
+menu_list = arcade.SpriteList()
+
+signpost = arcade.Sprite('images/signpost.png', SCALE*4)
+signpost.center_x = WIDTH/2 + 20
+signpost.center_y = HEIGHT/2 + 20
+menu_list.append(signpost)
+
+sign = arcade.Sprite('images/roadtoeternity.png')
+menu_list.append(sign)
+
+button = Button(WIDTH/2, HEIGHT*0.75, 683, 194) # the whacky numbers are the tingies for the picture
+
 """ moke the FUNctions """
 
 def fly_carole_fly():
@@ -138,8 +196,32 @@ def fly_carole_fly():
 
 """ make the fanctions """
 
+def menu():
+    global sign, show_menu
+
+
+    button_condition = button.update()
+    menu_list[1].kill()
+    if button_condition ==  0:
+        sign = arcade.Sprite('images/roadtoeternity.png')
+    elif button_condition == 1:
+        sign = arcade.Sprite('images/roadtoeternity(hover).png')
+    elif button_condition == 2:
+        sign = arcade.Sprite('images/roadtoeternity(clicked).png')
+    elif button_condition == 3:
+        show_menu = False
+
+    menu_list.append(sign)
+
+    sign.center_x = WIDTH / 2
+    sign.center_y = HEIGHT * 0.75
+
+    menu_list.draw()
+
 def game_over():
-    global carole_is_dying
+    global carole_is_dying, show_menu
+
+    show_menu = True
 
     carole = part_list[3]
 
@@ -328,7 +410,9 @@ def setup():
     window.on_draw = on_draw
     window.on_key_press = on_key_press
     window.on_key_release = on_key_release
+    window.on_mouse_motion = on_mouse_motion
     window.on_mouse_press = on_mouse_press
+    window.on_mouse_release = on_mouse_release
 
     arcade.run()
 
@@ -339,17 +423,20 @@ def update(delta_time):
     for particle in dust_list:
         particle.update()
 
-    if not carole_is_dying:
-        if carole_is_flying:
-            fly_carole_fly()
-        update_obstacles()
-        check_carole_collision()
-        update_motorcycle()
+    if show_menu:
+        menu()
     else:
-        game_over()
+        if not carole_is_dying:
+           update_obstacles()
+           check_carole_collision()
+        else:
+            game_over()
 
-    timer += 1
+        timer += 1
 
+    if carole_is_flying:
+        fly_carole_fly()
+    update_motorcycle()
 
 def on_draw():
 
@@ -374,10 +461,8 @@ def on_draw():
         if particle.speed < -2:
             particle.draw()
 
-
-    # Draw the minu:
-    #if menu == True:
-
+    if show_menu:
+        menu()
 
 
 def on_key_press(key, modifiers):
@@ -413,12 +498,21 @@ def on_key_release(key, modifiers):
         decelerate = False
 
 
-def on_mouse_press(x, y, button, modifiers):
-    pass
+def on_mouse_motion(x, y, dx, dy):
+    global mouse_x, mouse_y
+    mouse_x = x
+    mouse_y = y
 
+
+def on_mouse_press(x, y, button, modifiers):
+    global mouse_pressed, mouse_released
+    mouse_pressed = True
+    mouse_released = False
 
 def on_mouse_release(x, y, button, modifiers):
-    pass
+    global mouse_pressed, mouse_released
+    mouse_pressed = False
+    mouse_released = True
 
 
 if __name__ == '__main__':
