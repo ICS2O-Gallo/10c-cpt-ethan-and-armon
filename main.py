@@ -33,11 +33,14 @@ carole_is_dying = False
 second = 0
 # cheats and fun stuff
 carole_is_flying = False
+cheats_activated = False
 ddup = True # death do us part (as in carole and teh motorcycle)
 
 
 # timer for seconds since stort:
 timer = 0
+current_score = 0
+high_score = 0
 
 # keep track of mouse for other functions:
 mouse_x = 0
@@ -156,7 +159,7 @@ def fly_carole_fly():
     body = part_list[2]
     carole.change_x += 0.1
     if jumping and 0 <= carole.change_y:
-        carole.change_y += 4
+        carole.change_y += 4.5
     if falling:
         carole.change_y -= 1
     if carole.center_y <= body.center_y - 18:
@@ -176,8 +179,15 @@ def fly_carole_fly():
         carole_is_flying = False
 
 
+def add_points(points):
+    global current_score, high_score, cheats_activated
 
-
+    if cheats_activated:
+        current_score = 0
+    else:
+        current_score += points
+        if current_score > high_score:
+            high_score = current_score
 
 
 """ make the fanctions """
@@ -206,10 +216,12 @@ def menu():
     menu_list.draw()
 
 def reset():
-    global part_list, obstacle_list, carole_is_dying, timer
+    global part_list, obstacle_list, carole_is_dying, timer, current_score, cheats_activated
 
     carole_is_dying = False
+    cheats_activated = False
     timer = 0
+    current_score = 0
 
     # create obstacle lirt:
     obstacle_list = arcade.SpriteList()
@@ -446,6 +458,7 @@ def update(delta_time):
         check_carole_collision()
         update_motorcycle()
         timer += 1
+        add_points(1)
 
     if carole_is_dying:
         game_over()
@@ -478,11 +491,16 @@ def on_draw():
 
     if show_menu:
         menu()
+    else:
+        global current_score, high_score
 
+        font_size = 20
+        arcade.draw_text(str(current_score), 10, HEIGHT - font_size - 20, arcade.color.BLACK, font_size = font_size)
+        arcade.draw_text(str(high_score), 10, HEIGHT - 2*font_size - 30, arcade.color.BLACK, font_size = font_size)
 
 def on_key_press(key, modifiers):
     global accelerate, decelerate, jumping, falling, carole_is_flying # actooal stuff
-    global ddup # chets
+    global cheats_activated, ddup # chets
 
     # cheat codes:
     if key == arcade.key.D:
@@ -491,6 +509,7 @@ def on_key_press(key, modifiers):
         else:
             ddup = True
 
+        cheats_activated = True
 
     if key == arcade.key.UP:
         if jumping == True:
