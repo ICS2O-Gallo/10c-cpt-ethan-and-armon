@@ -41,6 +41,7 @@ ddup = True # death do us part (as in carole and teh motorcycle)
 timer = 0
 current_score = 0
 high_score = 0
+jump_score = 0
 
 # keep track of mouse for other functions:
 mouse_x = 0
@@ -155,6 +156,8 @@ button = Button(WIDTH/2, HEIGHT*0.75, 683, 194) # the whacky numbers are the tin
 """ moke the FUNctions """
 
 def fly_carole_fly():
+    global jump_score
+
     carole = part_list[3]
     body = part_list[2]
     carole.change_x += 0.1
@@ -162,6 +165,10 @@ def fly_carole_fly():
         carole.change_y += 4.5
     if falling:
         carole.change_y -= 1
+
+    if carole.center_y > jump_score:
+        jump_score = carole.center_y
+
     if carole.center_y <= body.center_y - 18:
         global carole_is_flying
 
@@ -172,6 +179,9 @@ def fly_carole_fly():
         if catch:
             if carole.center_x <= body.center_x - 50 or carole.center_x >= body.center_x + 50:
                 game_over()
+            else:
+                add_points(jump_score - GROUND)
+                jump_score = 0
 
         else:
             game_over()
@@ -185,7 +195,7 @@ def add_points(points):
     if cheats_activated:
         current_score = 0
     else:
-        current_score += points
+        current_score += int(points)
         if current_score > high_score:
             high_score = current_score
 
@@ -343,6 +353,9 @@ def jump(body):
 
 def update_motorcycle():
 
+    # testing:
+    print(jump_score)
+
     body = part_list[2]
     carole = part_list[3]
     body.change_x -= 0.05
@@ -495,8 +508,10 @@ def on_draw():
         global current_score, high_score
 
         font_size = 20
-        arcade.draw_text(str(current_score), 10, HEIGHT - font_size - 20, arcade.color.BLACK, font_size = font_size)
-        arcade.draw_text(str(high_score), 10, HEIGHT - 2*font_size - 30, arcade.color.BLACK, font_size = font_size)
+        score_board = arcade.Sprite('images/scoreboard.png', 2*SCALE, center_x=130, center_y=HEIGHT - 100)
+        score_board.draw()
+        arcade.draw_text(str(high_score), 240, HEIGHT - font_size - 55, arcade.color.BLACK, font_size = font_size)
+        arcade.draw_text(str(current_score), 240, HEIGHT - 2*font_size - 85, arcade.color.BLACK, font_size = font_size)
 
 def on_key_press(key, modifiers):
     global accelerate, decelerate, jumping, falling, carole_is_flying # actooal stuff
